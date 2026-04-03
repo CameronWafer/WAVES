@@ -1,0 +1,35 @@
+---
+description: Keep README files in sync when AM or ACT24 notebooks are modified
+globs: AM Full Code/AM_restart1.ipynb, ACT24 Full Code/dataCleanOneChunk_ACT.ipynb
+alwaysApply: false
+---
+
+# Notebook README Sync Rule
+
+When any change is made to either of the two notebooks below, the corresponding README must be updated to reflect that change before the task is considered complete.
+
+## Notebook → README Mapping
+
+| Notebook | README to update |
+|---|---|
+| `AM Full Code/AM_restart1.ipynb` | `AM Full Code/README.md` |
+| `ACT24 Full Code/dataCleanOneChunk_ACT.ipynb` | `ACT24 Full Code/README.md` |
+
+## What to Document
+
+Update the README whenever a change affects any of the following:
+
+- **Inputs**: new source files, removed files, or renamed columns in input data
+- **Participant/session-specific fixes**: new edge cases, dropped observations, manual overrides, or cutoffs
+- **Processing logic**: changes to how behaviors are classified, tracks are expanded, observations are merged, or values are forward-filled
+- **Encoding maps**: additions, removals, or renames in the activity, posture, domain, or intensity lookup tables
+- **Derived columns**: new columns added, existing columns removed, or renamed columns
+- **Output files**: new exports, removed exports, or schema changes to existing exports
+
+## How to Update
+
+- Edit the relevant section of the README rather than appending a changelog to the bottom.
+- Keep the README accurate to the *current* state of the notebook — it is a living description, not a change log.
+- If a step is added, insert it in the correct numbered position and renumber subsequent steps.
+- If a step is removed, delete it and renumber.
+- If only a detail within a step changes (e.g., a new participant ID is excluded), update that detail in-place.
