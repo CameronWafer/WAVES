@@ -159,7 +159,8 @@ Both are then forward-filled within each observation.
 **posture_wbm + Activity_Type → `sed.posture_do`:**
 - `sedentary`: sitting (non-vehicle), lying
 - `sed_drive`: sitting while driving or as a passenger
-- `active`: all other postures
+- `active`: all other codable postures
+- `NA`: `posture_wbm` is `"not_coded"` or missing — no valid sedentary classification possible
 
 ### 14. Session-Specific Post-Processing
 - **AM02 DO2_b**: All rows for this split session are dropped. `DO2_a` is relabeled to `DO2`.
@@ -175,6 +176,7 @@ Both are then forward-filled within each observation.
    - `stand_move` → `light`
    - `walk`, `walk_load`, `ascend`, `descend` → `moderate`
    - `running`, `biking`, `sport_move`, `muscle_strength` → `vigorous`
+4. After all derivation, `intensity_do` is explicitly set to `NA` for any row where `posture_wbm` is `"not_coded"` or `NaN`, preventing forward-filled values from bleeding into uncoded posture rows.
 
 ### 16. Final Column Schema
 The final `waves_df_clean` dataframe contains:
@@ -184,18 +186,19 @@ The final `waves_df_clean` dataframe contains:
 ### 17. Export
 
 **`Cameron_AM_Clean.csv`** — Full output:
-All columns listed above. Note: `work_type` is computed internally but dropped before export.
+All columns listed above. Note: `work_type` is computed internally but dropped before export. All null values are written as the string `"NA"` so no cells appear blank.
 
-**`Cameron_AM_Clean_WavesReady.csv`** — Codebook-style output:
+**`Cameron_AM_Clean_WavesReady.csv`** — Codebook-style output (all null values written as the string `"NA"`):
 `site`, `pid`, `observation`, `date_time`, `date`, `time`, `domain_do`, `posture_do`, `intensity3_do`, `intensity4_do`, `steps_do`, `Sedtype_do`
 
 Additional derived columns in the WavesReady export:
 - `domain_do`: collapses `broad_domain` into 5 top-level groups (`leisure`, `household`, `transportation`, `occupation`, `other`)
 - `posture_do`: maps `broad.posture_do` to codebook values (`sedentary`, `mixed_movement`, `walking`, `running`, `biking`)
-- `Sedtype_do`: classifies each second as `non_sedentary`, `sit_lie`, `Lying`, or `Vehicle`
-- `intensity3_do`: combines `moderate` and `vigorous` into `mvpa`
-- `intensity4_do`: 1-to-1 copy of `intensity_do` (4 levels: sedentary, light, moderate, vigorous)
-- `steps_do`: set to `"NA"` for all AM rows (no step data in this pipeline)
+- `Sedtype_do`: classifies each second as `non_sedentary`, `sit_lie`, `Lying`, or `Vehicle`; set to `NA` when `posture_wbm` is `"not_coded"` or missing
+- `intensity3_do`: combines `moderate` and `vigorous` into `mvpa`; set to `NA` when posture is `"not_coded"` or missing
+- `intensity4_do`: 1-to-1 copy of `intensity_do`; set to `NA` when posture is `"not_coded"` or missing
+- `steps_do`: set to `NA` when posture is `"not_coded"` or missing (no valid context); always `"NA"` string for AM rows regardless (no step data in this pipeline)
+- `posture_do`: set to `NA` when posture is `"not_coded"` or missing
 
 ---
 
