@@ -133,6 +133,40 @@ Additional derived columns in the WavesReady export:
 
 ---
 
+## Post-Processing Pipeline
+
+**File:** `maybe_fix_act24.ipynb`
+
+This notebook applies additional fixes and data enrichment on top of `Cameron_ACT24_Clean_NoDrop.csv`. It is run as a separate step after the main pipeline and produces `act24_testing.csv` and `summary_act24_testing.csv`.
+
+### Inputs
+
+| File | Description |
+|------|-------------|
+| `Cameron_ACT24_Clean_NoDrop.csv` | Output of the main pipeline |
+| `C:\Users\HELIOS-300\Desktop\Data\activPal ACT24\ACT24_###-*.csv` | Per-second activPal sensor files, one per participant (semicolon-delimited, `sep=;` header line) |
+
+### Steps
+
+1. **Remap `activity_type` to full labels** — Converts coded values (e.g. `work_general`) to full labels (e.g. `WRK- General`) using a backwards mapping table. Overwrites the `activity_type` column in place.
+
+2. **Remap `broad_domain`** — Derives `broad_domain` from the new full-label `activity_type` using domain classification lists (household / occupation / leisure / transportation / other / non_codable). Case-insensitive matching; any unmatched labels are flagged as `"unmapped"`.
+
+3. **Enforce non_codable intensity** — Where `activity_type == "OTHER- Non-Codable"`, sets `intensity_do = "non_codable"`.
+
+4. **Merge activPal sensor data** — Loads all `ACT24_###` files from the activPal folder, extracts participant ID from the filename prefix, and left-merges onto the base file on `id` + `date_time`. Brings in all activPal columns: `StepCount`, `Activity Score (MET.s)`, `Sedentary Time (s)`, `Upright Time (s)`, `Stepping Time (s)`, `Cycling Time (s)`, `Primary Lying Time (s)`, `Secondary Lying Time (s)`, `Nonwear Time (s)`, `Seated Transport Time (s)`, `Data Errors (s)`, `Sedentary to Upright Movements`, `Upright to Sedentary Movements`, `Sum(abs(dChannel1/2/3))`.
+
+5. **Nullify activPal columns for non_codable rows** — For rows where `activity_type == "OTHER- Non-Codable"`, all activPal columns are set to NaN.
+
+### Outputs
+
+| File | Description |
+|------|-------------|
+| `act24_testing.csv` | Base file with remapped labels and activPal columns merged in |
+| `summary_act24_testing.csv` | 46-row summary (one per `id`+`obs`) with `gt_total_steps`, `gt_sedentary_s`, `ap_total_steps`, `ap_sedentary_s` |
+
+---
+
 ## Key Design Decisions
 
 - **Dual-track expansion**: Activity and posture behaviors are expanded independently before merging. This preserves simultaneous events at the same timestamp rather than overwriting one with the other.
