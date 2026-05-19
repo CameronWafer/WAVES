@@ -1,0 +1,10 @@
+name: WAVES_accelerometer
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - openjdk=11        # Java 11 is widely available on conda-forge; change to =8 only if accProcess requires it
+  - pip
+  - pip:
+      - accelerometer==7.2.3

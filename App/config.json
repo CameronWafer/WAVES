@@ -1,0 +1,31 @@
+{
+  "app_name": "WAVES Processor",
+  "app_version": "1.0.0",
+
+  "actinet": {
+    "enabled": true,
+    "env_name": "WAVES_actinet",
+    "executable": "envs/WAVES_actinet/Scripts/actinet.exe",
+    "version": "0.7.0",
+    "input_extensions": [".gt3x"],
+    "make_plot": true
+  },
+
+  "accelerometer": {
+    "enabled": true,
+    "env_name": "WAVES_accelerometer",
+    "executable": "envs/WAVES_accelerometer/Scripts/accProcess.exe",
+    "version": "7.2.3",
+    "input_extensions": [".gt3x"],
+    "recursive": false
+  },
+
+  "outputs": {
+    "default_folder_name": "WAVES Outputs",
+    "timestamp_run_folders": true
+  },
+
+  "logging": {
+    "log_folder": "logs"
+  }
+}

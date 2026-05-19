@@ -1,0 +1,65 @@
+# ============================================================
+# WAVES Processor — .gitignore
+#
+# GitHub file size limit: 100 MB per file
+# GitHub repo soft limit: 2 GB total
+#
+# The packed Conda environments are 1–3 GB each and MUST NOT
+# be committed. Everything below is safe to push.
+# Source code (.py, .yml, .json, .bat, .iss) is fine.
+# ============================================================
+
+# ----------------------------------------------------------
+# Conda environments — NEVER commit these (1–3 GB each)
+# ----------------------------------------------------------
+envs/
+release_build/
+
+# Packed environment zip archives
+*.zip
+
+# ----------------------------------------------------------
+# PyInstaller build outputs — large and machine-specific
+# ----------------------------------------------------------
+dist/
+build/
+*.spec
+
+# ----------------------------------------------------------
+# Run logs — user-specific runtime output
+# ----------------------------------------------------------
+logs/*.log
+
+# ----------------------------------------------------------
+# Python cache files
+# ----------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# ----------------------------------------------------------
+# Test cache and coverage
+# ----------------------------------------------------------
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+.eggs/
+
+# ----------------------------------------------------------
+# OS and editor artifacts
+# ----------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# ----------------------------------------------------------
+# Secrets / local config overrides — never commit
+# ----------------------------------------------------------
+.env
+*.local.json
