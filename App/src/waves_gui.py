@@ -16,7 +16,7 @@ import threading
 import tkinter as tk
 from datetime import datetime
 from pathlib import Path
-from tkinter import filedialog, messagebox, scrolledtext
+from tkinter import filedialog, messagebox, scrolledtext, ttk
 
 # ---------------------------------------------------------------------------
 # Path bootstrap — must happen before local imports so src/ is on sys.path
@@ -200,6 +200,24 @@ class WavesApp(tk.Tk):
         self._run_btn.grid(row=row, column=0, sticky="ew", pady=(14, 6))
         row += 1
 
+        # --- Progress bar (hidden until run starts) ---
+        self._progress = ttk.Progressbar(body, mode="indeterminate", length=400)
+        self._progress.grid(row=row, column=0, columnspan=2, sticky="ew", pady=(0, 2))
+        self._progress.grid_remove()
+        row += 1
+
+        # --- Elapsed time label (hidden until run starts) ---
+        self._timer_label = tk.Label(
+            body,
+            text="",
+            bg=CLR_BG,
+            font=FONT_UI,
+            anchor="w",
+        )
+        self._timer_label.grid(row=row, column=0, sticky="w", pady=(0, 4))
+        self._timer_label.grid_remove()
+        row += 1
+
         # --- Status label ---
         tk.Label(body, text="Status:", bg=CLR_BG, font=FONT_BOLD).grid(
             row=row, column=0, sticky="w"
@@ -223,6 +241,7 @@ class WavesApp(tk.Tk):
         # --- Bottom action buttons ---
         bottom = tk.Frame(body, bg=CLR_BG)
         bottom.grid(row=row, column=0, sticky="w")
+        row += 1
 
         self._open_output_btn = tk.Button(
             bottom,
@@ -239,6 +258,17 @@ class WavesApp(tk.Tk):
             state="disabled",
         )
         self._open_log_btn.pack(side="left")
+
+        # Help on its own row so it's always visible
+        help_row = tk.Frame(body, bg=CLR_BG)
+        help_row.grid(row=row, column=0, sticky="w", pady=(4, 0))
+
+        tk.Button(
+            help_row,
+            text="Help",
+            command=self._show_help,
+            width=10,
+        ).pack(side="left")
 
     # ------------------------------------------------------------------
     # Folder browsing
@@ -333,7 +363,13 @@ class WavesApp(tk.Tk):
         self._run_btn.configure(state="disabled")
         self._open_output_btn.configure(state="disabled")
         self._open_log_btn.configure(state="disabled")
+        self._progress.grid()
+        self._progress.start(12)
+        self._timer_label.configure(text="Elapsed: 00:00:00")
+        self._timer_label.grid()
+        self._start_time = datetime.now()
         self._running = True
+        self._update_timer()
 
         threading.Thread(
             target=self._worker,
@@ -441,7 +477,7 @@ class WavesApp(tk.Tk):
                 continue
             ok = [r for r in results if r["status"] == "success"]
             bad = [r for r in results if r["status"] == "failed"]
-            self._push(f"{label}   —   Succeeded: {len(ok)}   Failed: {len(bad)}")
+            self._push(f"{label},  Succeeded: {len(ok)},  Failed: {len(bad)}")
             for r in bad:
                 self._push(f"  FAILED: {Path(r['file']).name}")
 
@@ -465,9 +501,15 @@ class WavesApp(tk.Tk):
                     self._log(payload)
                 elif msg_type == "validation_error":
                     messagebox.showwarning("Cannot Run", payload)
-                    self._log("Validation failed — see the message above.")
+                    self._log("Validation failed, see the message above.")
                 elif msg_type == "done":
                     self._running = False
+                    self._progress.stop()
+                    self._progress.grid_remove()
+                    elapsed = int((datetime.now() - self._start_time).total_seconds())
+                    h, remainder = divmod(elapsed, 3600)
+                    m, s = divmod(remainder, 60)
+                    self._timer_label.configure(text=f"Total time: {h:02d}:{m:02d}:{s:02d}")
                     self._run_btn.configure(state="normal")
                     if self._last_output_dir:
                         self._open_output_btn.configure(state="normal")
@@ -476,6 +518,110 @@ class WavesApp(tk.Tk):
         except queue.Empty:
             pass
         self.after(100, self._poll_queue)
+
+    # ------------------------------------------------------------------
+    # Elapsed time timer
+    # ------------------------------------------------------------------
+
+    def _update_timer(self):
+        if not self._running:
+            return
+        elapsed = int((datetime.now() - self._start_time).total_seconds())
+        h, remainder = divmod(elapsed, 3600)
+        m, s = divmod(remainder, 60)
+        self._timer_label.configure(text=f"Elapsed: {h:02d}:{m:02d}:{s:02d}")
+        self.after(1000, self._update_timer)
+
+    # ------------------------------------------------------------------
+    # Help dialog
+    # ------------------------------------------------------------------
+
+    def _show_help(self):
+        QA = [
+            (
+                "How do I select my input folder?",
+                "Click Browse next to 'Input folder' and navigate to the folder\n"
+                "that contains your raw accelerometer files (.gt3x or .bin).\n"
+                "Select the folder itself, you won't see individual files in the dialog,\n"
+                "that is normal. Click OK to confirm.",
+            ),
+            (
+                "What file types are supported?",
+                "ActiGraph files:  .gt3x\n"
+                "GENEActiv files:  .bin\n\n"
+                "Both pipelines (ActiNet and Accelerometer) support these formats.",
+            ),
+            (
+                "How do I see my output files?",
+                "When the run finishes, click 'Open Output Folder'.\n"
+                "Outputs are saved to:\n"
+                "  Documents\\WAVES Outputs\\<date_time>\\\n\n"
+                "ActiNet outputs go into an 'actinet' subfolder.\n"
+                "Accelerometer outputs go into an 'accelerometer' subfolder.",
+            ),
+            (
+                "How long does processing take?",
+                "ActiNet:       ~12 minutes per file\n"
+                "Accelerometer: ~25 minutes per file\n\n"
+                "The status box updates after each file completes.\n"
+                "The app will not freeze, it is working in the background.",
+            ),
+            (
+                "Something went wrong, what do I do?",
+                "Click 'Open Log Folder' and find the most recent .log file.\n"
+                "Please send that file to Cameron Hafer at cameroonhafer@gmail.com.\n"
+                "It contains all the details needed to diagnose the problem.",
+            ),
+        ]
+
+        win = tk.Toplevel(self)
+        win.title("WAVES Processor - Help")
+        win.configure(bg=CLR_BG)
+        win.resizable(False, False)
+        win.grab_set()  # modal
+
+        tk.Label(
+            win,
+            text="Help",
+            bg=CLR_HEADER,
+            fg="white",
+            font=FONT_HEADER,
+            pady=8,
+            padx=16,
+        ).pack(fill="x")
+
+        body = tk.Frame(win, bg=CLR_BG, padx=20, pady=14)
+        body.pack(fill="both")
+
+        for i, (question, answer) in enumerate(QA):
+            if i > 0:
+                tk.Frame(body, bg="#cccccc", height=1).pack(fill="x", pady=(0, 10))
+
+            tk.Label(
+                body,
+                text=f"Q:  {question}",
+                bg=CLR_BG,
+                font=FONT_BOLD,
+                anchor="w",
+                justify="left",
+            ).pack(fill="x")
+
+            tk.Label(
+                body,
+                text=answer,
+                bg=CLR_BG,
+                font=FONT_UI,
+                anchor="w",
+                justify="left",
+                pady=4,
+            ).pack(fill="x", padx=(16, 0))
+
+        tk.Button(
+            body,
+            text="Close",
+            command=win.destroy,
+            width=10,
+        ).pack(pady=(10, 4))
 
     # ------------------------------------------------------------------
     # Open folder buttons
