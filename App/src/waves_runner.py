@@ -1,10 +1,14 @@
 """
 waves_runner.py
-Executes the ActiNet and Accelerometer pipelines using bundled executables.
+Executes the ActiNet and Accelerometer pipelines via the bundled Conda python.exe.
 
-Confirmed working commands (tested 2026-05-18):
-  actinet.exe "file.gt3x" -o "output_dir" -p
-  accProcess.exe "file.gt3x" -o "output_dir"
+Invocation strategy (confirmed working 2026-05-27):
+  python.exe -m actinet.actinet "file.gt3x" -o "output_dir" -p
+  python.exe -m accelerometer.accProcess "file.gt3x" -o "output_dir"
+
+Using python.exe -m <module> instead of the .exe launcher scripts avoids the
+conda-unpack path-fixup problem: python.exe is a native binary with no hardcoded
+install paths, so it works on any machine without conda-unpack.
 
 Key design decisions:
 - Sets PATH and JAVA_HOME explicitly so bundled Java is found on clean machines.
@@ -101,7 +105,7 @@ def run_actinet(
     input_dir: Path,
     output_dir: Path,
     env_dir: Path,
-    actinet_exe: Path,
+    python_exe: Path,
     config: dict,
     log: WavesLogger,
     progress_callback: Optional[Callable[[str], None]] = None,
@@ -111,7 +115,7 @@ def run_actinet(
     Returns a list of per-file result dicts.
     Continues on single-file failures.
 
-    Confirmed command: actinet.exe "file.gt3x" -o "output_dir" -p
+    Confirmed command: python.exe -m actinet.actinet "file.gt3x" -o "output_dir" -p
     actinet uses its bundled torch_hub_cache automatically — no -c flag needed.
     """
     actinet_output_dir = output_dir / "actinet"
@@ -133,7 +137,7 @@ def run_actinet(
         if progress_callback:
             progress_callback(msg)
 
-        command = [str(actinet_exe), str(file), "-o", str(actinet_output_dir)]
+        command = [str(python_exe), "-m", "actinet.actinet", str(file), "-o", str(actinet_output_dir)]
         if make_plot:
             command.append("-p")
 
@@ -150,7 +154,7 @@ def run_accelerometer(
     input_dir: Path,
     output_dir: Path,
     env_dir: Path,
-    accprocess_exe: Path,
+    python_exe: Path,
     config: dict,
     log: WavesLogger,
     progress_callback: Optional[Callable[[str], None]] = None,
@@ -161,7 +165,7 @@ def run_accelerometer(
     Returns a list of per-file result dicts (same structure as run_actinet).
     Continues on single-file failures.
 
-    Confirmed command: accProcess.exe "file.gt3x" -o "output_dir"
+    Confirmed command: python.exe -m accelerometer.accProcess "file.gt3x" -o "output_dir"
     Default walmsley model is used automatically — no --activityModel flag needed.
     """
     accelerometer_output_dir = output_dir / "accelerometer"
@@ -182,7 +186,7 @@ def run_accelerometer(
         if progress_callback:
             progress_callback(msg)
 
-        command = [str(accprocess_exe), str(file), "-o", str(accelerometer_output_dir)]
+        command = [str(python_exe), "-m", "accelerometer.accProcess", str(file), "-o", str(accelerometer_output_dir)]
         results.append(_run_one_file(command, file, subprocess_env, log))
 
     return results

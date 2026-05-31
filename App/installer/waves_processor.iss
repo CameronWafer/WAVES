@@ -1,17 +1,17 @@
 ; ============================================================
 ; WAVES Processor - Inno Setup installer script
-; Builds: WAVES_Processor_Setup_v1.0.0.exe
+; Builds: WAVES_Processor_Setup_v1.2.exe
 ;
 ; Installs to %LOCALAPPDATA%\WAVES Processor (no admin required).
-; Runs conda-unpack on both environments after copying files.
+; No conda-unpack needed: app invokes python.exe -m <module> directly.
 ; Creates desktop and Start Menu shortcuts.
 ; ============================================================
 
 #define AppName      "WAVES Processor"
-#define AppVersion   "1.0.0"
+#define AppVersion   "1.2"
 #define AppPublisher "WAVES Research"
 #define AppExeName   "WAVES Processor.exe"
-#define DistDir      "..\dist\WAVES Processor"
+#define DistDir      "D:\WAVES Processor"
 
 [Setup]
 AppName={#AppName}
@@ -20,7 +20,7 @@ AppPublisher={#AppPublisher}
 DefaultDirName={localappdata}\{#AppName}
 DefaultGroupName={#AppName}
 DisableProgramGroupPage=yes
-OutputDir=Output
+OutputDir=D:\WAVES Installer Output
 OutputBaseFilename=WAVES_Processor_Setup_v{#AppVersion}
 Compression=lzma2/ultra64
 SolidCompression=yes
@@ -49,9 +49,8 @@ Source: "{#DistDir}\config.json";           DestDir: "{app}";          Flags: ig
 ; Bundled Conda environments (large — may take a few minutes to copy)
 Source: "{#DistDir}\envs\*";                DestDir: "{app}\envs";     Flags: ignoreversion recursesubdirs createallsubdirs
 
-; Resources
-Source: "{#DistDir}\resources\*";           DestDir: "{app}\resources"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "*.ico"
-; Source: "..\resources\app_icon.ico";      DestDir: "{app}\resources"; Flags: ignoreversion
+; Resources (uncomment when resources folder is populated)
+; Source: "{#DistDir}\resources\*"; DestDir: "{app}\resources"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Dirs]
 ; Create an empty logs folder so the app can write logs immediately
@@ -62,21 +61,9 @@ Name: "{autoprograms}\{#AppName}"; Filename: "{app}\{#AppExeName}"
 Name: "{autodesktop}\{#AppName}";  Filename: "{app}\{#AppExeName}"; Tasks: desktopicon
 
 [Run]
-; Fix hardcoded paths inside the packed Conda environments.
-; This MUST run after files are copied and BEFORE the app first launches.
-Filename: "{app}\envs\WAVES_actinet\Scripts\conda-unpack.exe";
-  Parameters: ""; \
-  StatusMsg: "Configuring ActiNet environment (this may take a moment)..."; \
-  Flags: runhidden waituntilterminated; \
-  Check: FileExists(ExpandConstant('{app}\envs\WAVES_actinet\Scripts\conda-unpack.exe'))
-
-Filename: "{app}\envs\WAVES_accelerometer\Scripts\conda-unpack.exe";
-  Parameters: ""; \
-  StatusMsg: "Configuring Accelerometer environment (this may take a moment)..."; \
-  Flags: runhidden waituntilterminated; \
-  Check: FileExists(ExpandConstant('{app}\envs\WAVES_accelerometer\Scripts\conda-unpack.exe'))
+; NOTE: conda-unpack is no longer needed. The app calls python.exe -m actinet.actinet
+; and python.exe -m accelerometer.accProcess directly. python.exe is a native binary
+; with no hardcoded paths, so it works on any install location without path fixup.
 
 ; Offer to launch the app after install
-Filename: "{app}\{#AppExeName}"; \
-  Description: "Launch {#AppName}"; \
-  Flags: nowait postinstall skipifsilent
+Filename: "{app}\{#AppExeName}"; Description: "Launch {#AppName}"; Flags: nowait postinstall skipifsilent

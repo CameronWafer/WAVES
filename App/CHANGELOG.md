@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.0.0 — Initial release
+## v1.2 — Current release
 
 - ActiNet 0.7.0 bundled environment
 - Accelerometer 7.2.3 bundled environment

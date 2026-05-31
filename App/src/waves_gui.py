@@ -27,9 +27,9 @@ sys.path.insert(0, os.path.dirname(__file__))
 from waves_config import (
     get_app_dir,
     get_actinet_env_dir,
-    get_actinet_exe,
+    get_actinet_python,
     get_accelerometer_env_dir,
-    get_accelerometer_exe,
+    get_accelerometer_python,
     get_default_output_dir,
     get_log_dir,
     load_config,
@@ -305,12 +305,12 @@ class WavesApp(tk.Tk):
 
     def _run_startup_checks(self):
         missing = []
-        actinet_exe = get_actinet_exe(self.cfg, APP_DIR)
-        accel_exe = get_accelerometer_exe(self.cfg, APP_DIR)
-        if not actinet_exe.exists():
-            missing.append(str(actinet_exe))
-        if not accel_exe.exists():
-            missing.append(str(accel_exe))
+        actinet_python = get_actinet_python(self.cfg, APP_DIR)
+        accel_python = get_accelerometer_python(self.cfg, APP_DIR)
+        if not actinet_python.exists():
+            missing.append(str(actinet_python))
+        if not accel_python.exists():
+            missing.append(str(accel_python))
 
         if missing:
             lines = "\n".join(missing)
@@ -404,8 +404,8 @@ class WavesApp(tk.Tk):
 
         log.write_header(input_dir, output_dir, selected)
 
-        actinet_exe = get_actinet_exe(self.cfg, APP_DIR)
-        accel_exe = get_accelerometer_exe(self.cfg, APP_DIR)
+        actinet_python = get_actinet_python(self.cfg, APP_DIR)
+        accel_python = get_accelerometer_python(self.cfg, APP_DIR)
         actinet_env_dir = get_actinet_env_dir(self.cfg, APP_DIR)
         accel_env_dir = get_accelerometer_env_dir(self.cfg, APP_DIR)
 
@@ -414,9 +414,9 @@ class WavesApp(tk.Tk):
         errors: list[str] = []
 
         if run_actinet_flag:
-            errors += validate_for_actinet(input_dir, actinet_exe, self.cfg)
+            errors += validate_for_actinet(input_dir, actinet_python, self.cfg)
         if run_accel_flag:
-            errors += validate_for_accelerometer(input_dir, accel_exe, self.cfg)
+            errors += validate_for_accelerometer(input_dir, accel_python, self.cfg)
 
         out_err = check_output_folder(output_dir)
         if out_err:
@@ -444,7 +444,7 @@ class WavesApp(tk.Tk):
                 input_dir=input_dir,
                 output_dir=output_dir,
                 env_dir=actinet_env_dir,
-                actinet_exe=actinet_exe,
+                python_exe=actinet_python,
                 config=self.cfg,
                 log=log,
                 progress_callback=self._push,
@@ -459,7 +459,7 @@ class WavesApp(tk.Tk):
                 input_dir=input_dir,
                 output_dir=output_dir,
                 env_dir=accel_env_dir,
-                accprocess_exe=accel_exe,
+                python_exe=accel_python,
                 config=self.cfg,
                 log=log,
                 progress_callback=self._push,

@@ -72,7 +72,7 @@ def check_input_files(input_dir: Path, extensions: list[str], tool_name: str) ->
     return None
 
 
-def validate_for_actinet(input_dir: Path, actinet_exe: Path, config: dict) -> list[str]:
+def validate_for_actinet(input_dir: Path, python_exe: Path, config: dict) -> list[str]:
     errors = []
     err = check_input_folder(input_dir)
     if err:
@@ -81,13 +81,13 @@ def validate_for_actinet(input_dir: Path, actinet_exe: Path, config: dict) -> li
         err = check_input_files(input_dir, config["actinet"]["input_extensions"], "ActiGraph .gt3x")
         if err:
             errors.append(err)
-    err = check_executable(actinet_exe, "ActiNet")
+    err = check_executable(python_exe, "ActiNet")
     if err:
         errors.append(err)
     return errors
 
 
-def validate_for_accelerometer(input_dir: Path, accel_exe: Path, config: dict) -> list[str]:
+def validate_for_accelerometer(input_dir: Path, python_exe: Path, config: dict) -> list[str]:
     errors = []
     err = check_input_folder(input_dir)
     if err:
@@ -98,7 +98,7 @@ def validate_for_accelerometer(input_dir: Path, accel_exe: Path, config: dict) -
         )
         if err:
             errors.append(err)
-    err = check_executable(accel_exe, "Accelerometer")
+    err = check_executable(python_exe, "Accelerometer")
     if err:
         errors.append(err)
     return errors

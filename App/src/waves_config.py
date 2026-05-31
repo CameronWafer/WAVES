@@ -26,20 +26,22 @@ def load_config() -> dict:
         return json.load(f)
 
 
-def get_actinet_exe(config: dict, app_dir: Path) -> Path:
-    return app_dir / config["actinet"]["executable"]
-
-
-def get_accelerometer_exe(config: dict, app_dir: Path) -> Path:
-    return app_dir / config["accelerometer"]["executable"]
-
-
 def get_actinet_env_dir(config: dict, app_dir: Path) -> Path:
     return app_dir / "envs" / config["actinet"]["env_name"]
 
 
 def get_accelerometer_env_dir(config: dict, app_dir: Path) -> Path:
     return app_dir / "envs" / config["accelerometer"]["env_name"]
+
+
+def get_actinet_python(config: dict, app_dir: Path) -> Path:
+    """Return the path to python.exe inside the bundled actinet Conda environment."""
+    return get_actinet_env_dir(config, app_dir) / "python.exe"
+
+
+def get_accelerometer_python(config: dict, app_dir: Path) -> Path:
+    """Return the path to python.exe inside the bundled accelerometer Conda environment."""
+    return get_accelerometer_env_dir(config, app_dir) / "python.exe"
 
 
 def get_default_output_dir(config: dict) -> Path:
