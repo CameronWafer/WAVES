@@ -1,3 +1,6 @@
+# shortcut
+# "D:\WAVES Processor\WAVES Processor.exe"
+
 # WAVES Processor
 
 Windows desktop application that runs the ActiNet and Accelerometer accelerometer processing pipelines without requiring the user to install Python, Conda, Java, or any developer tools.
