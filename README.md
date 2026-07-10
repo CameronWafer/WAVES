@@ -1,8 +1,15 @@
 ﻿# WAVES
 
-Data processing pipelines for the WAVES study. This repository contains Jupyter notebooks that transform raw behavioral observation data into second-by-second, WAVES-codebook-ready datasets for two cohorts: **AM** and **ACT24**.
+This repo contains the data processing pipelines I built for the WAVES study. The main work here is a set of Jupyter notebooks that take raw behavioral observation data and transform it into second-by-second, WAVES-codebook-ready datasets for two cohorts: **AM** and **ACT24**.
 
-> **Note:** The WAVES Processor desktop app source code (`App/`) is included in this repository. The build artifacts (packed Conda environments, PyInstaller output, installer) are excluded from git due to size — see `App/README.md` for build instructions.
+I also built a Windows desktop app (WAVES Processor) that makes it easy for non-technical team members to run accelerometer processing tools without needing to install Python or Conda. The source code lives in `App/` — build artifacts are excluded from git due to size. See `App/README.md` for build and usage instructions.
+
+---
+
+## Author
+
+**Cameron Hafer**
+cameroonhafer@gmail.com
 
 ---
 
@@ -24,7 +31,7 @@ WAVES/
 
 ## Input Data
 
-Raw input files are **not included in this repository**. They were provided by Sarah Keadle and the WAVES Research Group. Input file paths in the notebooks are hardcoded to local machine paths and will need to be updated when running on a new machine.
+The raw input files are **not included in this repository** — they were provided by Sarah Keadle and the WAVES Research Group. File paths in the notebooks are hardcoded to my local machine and will need to be updated if you're running this somewhere else.
 
 ---
 
@@ -32,11 +39,11 @@ Raw input files are **not included in this repository**. They were provided by S
 
 **Location:** `AM Full Code/`
 
-Transforms raw AM (Actigraph Monitor) behavioral observation data into a second-by-second dataset ready for WAVES analysis.
+This pipeline takes the raw AM (Actigraph Monitor) behavioral observation data and produces a clean, second-by-second dataset ready for WAVES analysis.
 
 ### File Guide
 
-The files in this folder have non-obvious names. Here is what each one actually is:
+I'll be honest — the file names in here aren't intuitive at all. Here's what everything actually is:
 
 | File | What it actually is |
 |------|---------------------|
@@ -73,11 +80,11 @@ The files in this folder have non-obvious names. Here is what each one actually 
 
 **Location:** `ACT24 Full Code/`
 
-Transforms raw ACT24 behavioral observation data into a second-by-second dataset with activity type, posture, domain, intensity, and ground-truth step count columns.
+This pipeline takes the raw ACT24 behavioral observation data and produces a second-by-second dataset with activity type, posture, domain, intensity, and ground-truth step count columns.
 
 ### File Guide
 
-The files in this folder have non-obvious names. Here is what each one actually is:
+Same story here — the names aren't obvious. Here's what everything actually is:
 
 | File | What it actually is |
 |------|---------------------|
@@ -90,7 +97,7 @@ The files in this folder have non-obvious names. Here is what each one actually 
 | `summary_act24_testing.csv` | Output of `maybe_fix_act24.ipynb` — per-session summary comparing ground-truth vs activPal |
 | `README.md` | Full step-by-step documentation of the pipeline |
 
-> **"NoDrop" in filenames** means non-codable rows are retained in the output (marked with `activity_type = non_codable`) rather than being dropped. This is the correct behavior for the current pipeline.
+> **"NoDrop" in filenames** means non-codable rows are kept in the output (marked with `activity_type = non_codable`) rather than being dropped. This is the correct behavior for the current pipeline.
 
 ### Run
 
@@ -116,11 +123,11 @@ The files in this folder have non-obvious names. Here is what each one actually 
 
 ## Other Folders
 
-These folders are **not needed to run the main pipelines** and are primarily of historical or investigative value.
+These folders are **not needed to run the main pipelines** — they're mostly QC scripts and exploratory work I did along the way.
 
 | Folder | Contents |
 |--------|----------|
-| `CompareFiles/` | QC scripts and comparison notebooks used to validate pipeline outputs. Includes `AM_INTEGRITY_REPORT.md` documenting known data quality issues in the AM cohort. |
+| `CompareFiles/` | QC scripts and comparison notebooks I used to validate pipeline outputs. Includes `AM_INTEGRITY_REPORT.md` documenting known data quality issues in the AM cohort. |
 | `Steps Data WAVES/steps/` | Raw step event log Excel files for ~40 participants, used by `Steps Code/stepsExplore.ipynb`. |
 | `Steps Code/` | Early step count exploration notebook. |
 | `ActivPal Full Code/` | ActivPal sensor exploration for the PALS cycling study, separate from the main AM/ACT24 pipelines. |
