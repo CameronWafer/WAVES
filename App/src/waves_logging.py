@@ -73,6 +73,7 @@ class WavesLogger:
         self,
         actinet_results: list[dict] | None = None,
         accelerometer_results: list[dict] | None = None,
+        stepcount_results: list[dict] | None = None,
     ):
         self._write("\n" + "=" * 60)
         self._write("Run Summary")
@@ -80,7 +81,11 @@ class WavesLogger:
 
         all_ok = True
 
-        for label, results in [("ActiNet", actinet_results), ("Accelerometer", accelerometer_results)]:
+        for label, results in [
+            ("ActiNet", actinet_results),
+            ("Accelerometer", accelerometer_results),
+            ("Step Count", stepcount_results),
+        ]:
             if results is None:
                 continue
             succeeded = [r for r in results if r["status"] == "success"]

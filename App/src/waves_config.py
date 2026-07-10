@@ -44,6 +44,15 @@ def get_accelerometer_python(config: dict, app_dir: Path) -> Path:
     return get_accelerometer_env_dir(config, app_dir) / "python.exe"
 
 
+def get_stepcount_env_dir(config: dict, app_dir: Path) -> Path:
+    return app_dir / "envs" / config["stepcount"]["env_name"]
+
+
+def get_stepcount_python(config: dict, app_dir: Path) -> Path:
+    """Return the path to python.exe inside the bundled stepcount Conda environment."""
+    return get_stepcount_env_dir(config, app_dir) / "python.exe"
+
+
 def get_default_output_dir(config: dict) -> Path:
     return Path.home() / "Documents" / config["outputs"]["default_folder_name"]
 

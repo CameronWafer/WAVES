@@ -1,6 +1,6 @@
 {
   "app_name": "WAVES Processor",
-  "app_version": "1.3",
+  "app_version": "1.4",
 
   "actinet": {
     "enabled": true,
@@ -23,6 +23,13 @@
   "outputs": {
     "default_folder_name": "WAVES Outputs",
     "timestamp_run_folders": true
+  },
+
+  "stepcount": {
+    "enabled": true,
+    "env_name": "WAVES_stepcount",
+    "version": "3.18.2",
+    "input_extensions": [".gt3x", ".bin", ".cwa"]
   },
 
   "logging": {

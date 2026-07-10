@@ -104,5 +104,22 @@ def validate_for_accelerometer(input_dir: Path, python_exe: Path, config: dict) 
     return errors
 
 
+def validate_for_stepcount(input_dir: Path, python_exe: Path, config: dict) -> list[str]:
+    errors = []
+    err = check_input_folder(input_dir)
+    if err:
+        errors.append(err)
+    else:
+        err = check_input_files(
+            input_dir, config["stepcount"]["input_extensions"], "accelerometer (.gt3x, .bin, .cwa)"
+        )
+        if err:
+            errors.append(err)
+    err = check_executable(python_exe, "Step Count")
+    if err:
+        errors.append(err)
+    return errors
+
+
 def count_files(input_dir: Path, extensions: list[str]) -> int:
     return len(find_input_files(input_dir, extensions))

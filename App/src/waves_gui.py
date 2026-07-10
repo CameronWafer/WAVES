@@ -30,17 +30,20 @@ from waves_config import (
     get_actinet_python,
     get_accelerometer_env_dir,
     get_accelerometer_python,
+    get_stepcount_env_dir,
+    get_stepcount_python,
     get_default_output_dir,
     get_log_dir,
     load_config,
 )
 from waves_logging import WavesLogger
-from waves_runner import run_actinet, run_accelerometer
+from waves_runner import run_actinet, run_accelerometer, run_stepcount
 from waves_validation import (
     check_output_folder,
     count_files,
     validate_for_actinet,
     validate_for_accelerometer,
+    validate_for_stepcount,
 )
 
 APP_DIR = get_app_dir()
@@ -163,11 +166,36 @@ class WavesApp(tk.Tk):
         checks.grid(row=row, column=0, sticky="w", pady=(2, 0))
         self._actinet_var = tk.BooleanVar(value=True)
         self._accel_var = tk.BooleanVar(value=False)
+        self._stepcount_var = tk.BooleanVar(value=False)
         tk.Checkbutton(
             checks, text="ActiNet", variable=self._actinet_var, bg=CLR_BG, font=FONT_UI
         ).pack(side="left", padx=(0, 20))
         tk.Checkbutton(
             checks, text="Accelerometer", variable=self._accel_var, bg=CLR_BG, font=FONT_UI
+        ).pack(side="left", padx=(0, 20))
+        tk.Checkbutton(
+            checks, text="Step Count", variable=self._stepcount_var, bg=CLR_BG, font=FONT_UI,
+            command=self._on_stepcount_toggle,
+        ).pack(side="left")
+        row += 1
+
+        # --- Step Count model selection (shown only when Step Count is checked) ---
+        self._stepcount_model_frame = tk.Frame(body, bg=CLR_BG)
+        self._stepcount_model_frame.grid(row=row, column=0, sticky="w", pady=(2, 0))
+        self._stepcount_model_frame.grid_remove()
+        self._stepcount_model_var = tk.StringVar(value="ssl")
+        tk.Label(
+            self._stepcount_model_frame, text="    Model:", bg=CLR_BG, font=FONT_UI
+        ).pack(side="left", padx=(0, 8))
+        tk.Radiobutton(
+            self._stepcount_model_frame, text="SSL (default)",
+            variable=self._stepcount_model_var, value="ssl",
+            bg=CLR_BG, font=FONT_UI,
+        ).pack(side="left", padx=(0, 12))
+        tk.Radiobutton(
+            self._stepcount_model_frame, text="Random Forest",
+            variable=self._stepcount_model_var, value="rf",
+            bg=CLR_BG, font=FONT_UI,
         ).pack(side="left")
         row += 1
 
@@ -274,6 +302,12 @@ class WavesApp(tk.Tk):
     # Folder browsing
     # ------------------------------------------------------------------
 
+    def _on_stepcount_toggle(self):
+        if self._stepcount_var.get():
+            self._stepcount_model_frame.grid()
+        else:
+            self._stepcount_model_frame.grid_remove()
+
     def _browse_input(self):
         d = filedialog.askdirectory(title="Select folder containing .gt3x files")
         if d:
@@ -307,10 +341,13 @@ class WavesApp(tk.Tk):
         missing = []
         actinet_python = get_actinet_python(self.cfg, APP_DIR)
         accel_python = get_accelerometer_python(self.cfg, APP_DIR)
+        stepcount_python = get_stepcount_python(self.cfg, APP_DIR)
         if not actinet_python.exists():
             missing.append(str(actinet_python))
         if not accel_python.exists():
             missing.append(str(accel_python))
+        if not stepcount_python.exists():
+            missing.append(str(stepcount_python))
 
         if missing:
             lines = "\n".join(missing)
@@ -342,8 +379,10 @@ class WavesApp(tk.Tk):
 
         run_actinet_flag = self._actinet_var.get()
         run_accel_flag = self._accel_var.get()
+        run_stepcount_flag = self._stepcount_var.get()
+        stepcount_model = self._stepcount_model_var.get()
 
-        if not run_actinet_flag and not run_accel_flag:
+        if not run_actinet_flag and not run_accel_flag and not run_stepcount_flag:
             messagebox.showwarning(
                 "No Process Selected", "Please select at least one process to run."
             )
@@ -373,7 +412,7 @@ class WavesApp(tk.Tk):
 
         threading.Thread(
             target=self._worker,
-            args=(input_dir, output_dir, run_actinet_flag, run_accel_flag),
+            args=(input_dir, output_dir, run_actinet_flag, run_accel_flag, run_stepcount_flag, stepcount_model),
             daemon=True,
         ).start()
 
@@ -391,6 +430,8 @@ class WavesApp(tk.Tk):
         output_dir: Path,
         run_actinet_flag: bool,
         run_accel_flag: bool,
+        run_stepcount_flag: bool = False,
+        stepcount_model: str = "ssl",
     ):
         timestamp = datetime.now().strftime("%Y-%m-%d_%H%M")
         log_dir = get_log_dir(self.cfg, APP_DIR)
@@ -401,13 +442,18 @@ class WavesApp(tk.Tk):
             selected.append("ActiNet")
         if run_accel_flag:
             selected.append("Accelerometer")
+        if run_stepcount_flag:
+            model_label = "SSL" if stepcount_model == "ssl" else "Random Forest"
+            selected.append(f"Step Count ({model_label})")
 
         log.write_header(input_dir, output_dir, selected)
 
         actinet_python = get_actinet_python(self.cfg, APP_DIR)
         accel_python = get_accelerometer_python(self.cfg, APP_DIR)
+        stepcount_python = get_stepcount_python(self.cfg, APP_DIR)
         actinet_env_dir = get_actinet_env_dir(self.cfg, APP_DIR)
         accel_env_dir = get_accelerometer_env_dir(self.cfg, APP_DIR)
+        stepcount_env_dir = get_stepcount_env_dir(self.cfg, APP_DIR)
 
         # --- Pre-run validation ---
         self._push("Validating inputs...")
@@ -417,6 +463,8 @@ class WavesApp(tk.Tk):
             errors += validate_for_actinet(input_dir, actinet_python, self.cfg)
         if run_accel_flag:
             errors += validate_for_accelerometer(input_dir, accel_python, self.cfg)
+        if run_stepcount_flag:
+            errors += validate_for_stepcount(input_dir, stepcount_python, self.cfg)
 
         out_err = check_output_folder(output_dir)
         if out_err:
@@ -427,13 +475,17 @@ class WavesApp(tk.Tk):
             self._queue.put(("done", None))
             return
 
-        if run_actinet_flag:
+        if run_actinet_flag or run_stepcount_flag:
             n = count_files(input_dir, self.cfg["actinet"]["input_extensions"])
-            self._push(f"Found {n} .gt3x file(s).")
-            est_min = n * 12 if run_actinet_flag else 0
+            self._push(f"Found {n} file(s) to process.")
+            est_min = 0
+            if run_actinet_flag:
+                est_min += n * 12
             if run_accel_flag:
                 est_min += n * 25
-            self._push(f"Estimated time: ~{est_min}–{est_min + n * 5} minutes. Please be patient.")
+            if run_stepcount_flag:
+                est_min += n * 10
+            self._push(f"Estimated time: ~{est_min}+ minutes. Please be patient.")
 
         # --- ActiNet ---
         actinet_results = None
@@ -465,14 +517,39 @@ class WavesApp(tk.Tk):
                 progress_callback=self._push,
             )
 
-        log.write_summary(actinet_results=actinet_results, accelerometer_results=accel_results)
+        # --- Step Count ---
+        stepcount_results = None
+        if run_stepcount_flag:
+            self._push("─" * 40)
+            model_label = "SSL" if stepcount_model == "ssl" else "Random Forest"
+            self._push(f"Starting Step Count ({model_label})...")
+            stepcount_results = run_stepcount(
+                input_dir=input_dir,
+                output_dir=output_dir,
+                env_dir=stepcount_env_dir,
+                python_exe=stepcount_python,
+                config=self.cfg,
+                log=log,
+                model=stepcount_model,
+                progress_callback=self._push,
+            )
+
+        log.write_summary(
+            actinet_results=actinet_results,
+            accelerometer_results=accel_results,
+            stepcount_results=stepcount_results,
+        )
 
         # --- Final summary in GUI ---
         self._push("─" * 40)
         self._push("Run complete.")
         self._push("")
 
-        for label, results in [("ActiNet", actinet_results), ("Accelerometer", accel_results)]:
+        for label, results in [
+            ("ActiNet", actinet_results),
+            ("Accelerometer", accel_results),
+            ("Step Count", stepcount_results),
+        ]:
             if results is None:
                 continue
             ok = [r for r in results if r["status"] == "success"]
@@ -562,9 +639,19 @@ class WavesApp(tk.Tk):
             (
                 "How long does processing take?",
                 "ActiNet:       ~12 minutes per file\n"
-                "Accelerometer: ~25 minutes per file\n\n"
+                "Accelerometer: ~25 minutes per file\n"
+                "Step Count:    ~10 minutes per file\n\n"
                 "The status box updates after each file completes.\n"
                 "The app will not freeze, it is working in the background.",
+            ),
+            (
+                "What is the difference between Step Count models?",
+                "SSL (default): Self-supervised learning model based on a\n"
+                "foundation model trained on the UK Biobank dataset.\n"
+                "Produces the most accurate step counts.\n\n"
+                "Random Forest: A simpler model using signal features.\n"
+                "Faster but generally less accurate than SSL.\n\n"
+                "When in doubt, use SSL.",
             ),
             (
                 "Something went wrong, what do I do?",

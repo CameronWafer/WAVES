@@ -2,6 +2,14 @@
 test_command_building.py
 Tests that the runner builds correct subprocess commands without actually
 executing any external processes. Uses monkeypatching.
+
+WARNING: These tests may be out of date.
+The runner was refactored (v1.4) to use python.exe -m <module> invocation instead
+of calling .exe launchers directly. The test signatures still pass `actinet_exe` /
+`fake_exe` as the exe parameter, but the actual runner now expects `python_exe`
+pointing at the bundled python.exe. Tests should be reviewed and updated to match
+the current run_actinet / run_accelerometer signatures, and run_stepcount tests
+should be added.
 """
 
 import sys

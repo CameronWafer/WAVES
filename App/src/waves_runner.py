@@ -190,3 +190,54 @@ def run_accelerometer(
         results.append(_run_one_file(command, file, subprocess_env, log))
 
     return results
+
+
+# ---------------------------------------------------------------------------
+# Step Count runner
+# ---------------------------------------------------------------------------
+
+def run_stepcount(
+    input_dir: Path,
+    output_dir: Path,
+    env_dir: Path,
+    python_exe: Path,
+    config: dict,
+    log: WavesLogger,
+    model: str = "ssl",
+    progress_callback: Optional[Callable[[str], None]] = None,
+) -> list[dict]:
+    """
+    Process each input file individually through stepcount.
+    model: "ssl" (default, self-supervised Resnet18) or "rf" (random forest, -t rf flag).
+    Supports .gt3x, .bin, and .cwa files.
+    Continues on single-file failures.
+
+    Entry point verified: python.exe -m stepcount.stepcount <file> -o <outdir> [-t rf]
+    """
+    stepcount_output_dir = output_dir / "stepcount"
+    stepcount_output_dir.mkdir(parents=True, exist_ok=True)
+
+    extensions = config["stepcount"]["input_extensions"]
+    files = _collect_files(input_dir, extensions)
+
+    if not files:
+        return [{"file": "", "status": "no_files"}]
+
+    subprocess_env = _build_subprocess_env(env_dir)
+    results: list[dict] = []
+
+    model_label = "SSL" if model == "ssl" else "Random Forest"
+
+    for i, file in enumerate(files, start=1):
+        msg = f"Step Count ({model_label}): processing file {i} of {len(files)}: {file.name}"
+        log.write_info(msg)
+        if progress_callback:
+            progress_callback(msg)
+
+        command = [str(python_exe), "-m", "stepcount.stepcount", str(file), "-o", str(stepcount_output_dir)]
+        if model == "rf":
+            command.extend(["-t", "rf"])
+
+        results.append(_run_one_file(command, file, subprocess_env, log))
+
+    return results

@@ -8,7 +8,7 @@
 ; ============================================================
 
 #define AppName      "WAVES Processor"
-#define AppVersion   "1.3"
+#define AppVersion   "1.4"
 #define AppPublisher "WAVES Research"
 #define AppExeName   "WAVES Processor.exe"
 #define DistDir      "D:\WAVES Processor"
