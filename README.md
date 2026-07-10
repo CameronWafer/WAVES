@@ -2,7 +2,7 @@
 
 This repo contains the data processing pipelines I built for the WAVES study. The main work here is a set of Jupyter notebooks that take raw behavioral observation data and transform it into second-by-second, WAVES-codebook-ready datasets for two cohorts: **AM** and **ACT24**.
 
-I also built a Windows desktop app (WAVES Processor) that makes it easy for non-technical team members to run accelerometer processing tools without needing to install Python or Conda. The source code lives in `App/` — build artifacts are excluded from git due to size. See `App/README.md` for build and usage instructions.
+I also built a Windows desktop app (WAVES Processor) that makes it easy for non-technical team members to run accelerometer processing tools without needing to install Python or Conda. The source code lives in `App/`. Build artifacts are excluded from git due to size. See `App/README.md` for build and usage instructions.
 
 ---
 
@@ -31,7 +31,7 @@ WAVES/
 
 ## Input Data
 
-The raw input files are **not included in this repository** — they were provided by Sarah Keadle and the WAVES Research Group. File paths in the notebooks are hardcoded to my local machine and will need to be updated if you're running this somewhere else.
+The raw input files are **not included in this repository**. They were provided by Sarah Keadle and the WAVES Research Group. File paths in the notebooks are hardcoded to my local machine and will need to be updated if you're running this somewhere else.
 
 ---
 
@@ -43,16 +43,16 @@ This pipeline takes the raw AM (Actigraph Monitor) behavioral observation data a
 
 ### File Guide
 
-I'll be honest — the file names in here aren't intuitive at all. Here's what everything actually is:
+I'll be honest, the file names in here aren't intuitive at all. Here's what everything actually is:
 
 | File | What it actually is |
 |------|---------------------|
-| `AM_restart1.ipynb` | **Main pipeline notebook** — run this first |
-| `maybe_fix_am.ipynb` | **Post-processing notebook** — activPal sensor merge; run after main pipeline |
-| `Cameron_AM_Clean.csv` | **Primary output** of `AM_restart1.ipynb` — full cleaned dataset |
-| `Cameron_AM_Clean_WavesReady.csv` | **Codebook output** of `AM_restart1.ipynb` — formatted for WAVES database entry |
-| `am_testing.csv` | Output of `maybe_fix_am.ipynb` — base data with activPal columns merged in |
-| `summary_am_testing.csv` | Output of `maybe_fix_am.ipynb` — per-session summary comparing ground-truth vs activPal |
+| `AM_restart1.ipynb` | **Main pipeline notebook**, run this first |
+| `maybe_fix_am.ipynb` | **Post-processing notebook**, activPal sensor merge; run after main pipeline |
+| `Cameron_AM_Clean.csv` | **Primary output** of `AM_restart1.ipynb`, full cleaned dataset |
+| `Cameron_AM_Clean_WavesReady.csv` | **Codebook output** of `AM_restart1.ipynb`, formatted for WAVES database entry |
+| `am_testing.csv` | Output of `maybe_fix_am.ipynb`, base data with activPal columns merged in |
+| `summary_am_testing.csv` | Output of `maybe_fix_am.ipynb`, per-session summary comparing ground-truth vs activPal |
 | `README.md` | Full step-by-step documentation of the pipeline |
 
 ### Run
@@ -84,17 +84,17 @@ This pipeline takes the raw ACT24 behavioral observation data and produces a sec
 
 ### File Guide
 
-Same story here — the names aren't obvious. Here's what everything actually is:
+Same story here, the names aren't obvious. Here's what everything actually is:
 
 | File | What it actually is |
 |------|---------------------|
-| `dataCleanOneChunk_ACT.ipynb` | **Main pipeline notebook** — run this first |
-| `maybe_fix_act24.ipynb` | **Post-processing notebook** — activPal merge, label remapping, non-codable handling; run after main pipeline |
-| `checking_act24.ipynb` | Scratch validation notebook — not part of the main pipeline |
-| `Cameron_ACT24_Clean_NoDrop.csv` | **Primary output** of `dataCleanOneChunk_ACT.ipynb` — full cleaned dataset |
-| `Cameron_ACT24_Clean_WavesReady_NoDrop.csv` | **Codebook output** of `dataCleanOneChunk_ACT.ipynb` — formatted for WAVES database entry |
-| `act24_testing.csv` | Output of `maybe_fix_act24.ipynb` — base data with activPal columns and remapped labels |
-| `summary_act24_testing.csv` | Output of `maybe_fix_act24.ipynb` — per-session summary comparing ground-truth vs activPal |
+| `dataCleanOneChunk_ACT.ipynb` | **Main pipeline notebook**, run this first |
+| `maybe_fix_act24.ipynb` | **Post-processing notebook**, activPal merge, label remapping, non-codable handling; run after main pipeline |
+| `checking_act24.ipynb` | Scratch validation notebook, not part of the main pipeline |
+| `Cameron_ACT24_Clean_NoDrop.csv` | **Primary output** of `dataCleanOneChunk_ACT.ipynb`, full cleaned dataset |
+| `Cameron_ACT24_Clean_WavesReady_NoDrop.csv` | **Codebook output** of `dataCleanOneChunk_ACT.ipynb`, formatted for WAVES database entry |
+| `act24_testing.csv` | Output of `maybe_fix_act24.ipynb`, base data with activPal columns and remapped labels |
+| `summary_act24_testing.csv` | Output of `maybe_fix_act24.ipynb`, per-session summary comparing ground-truth vs activPal |
 | `README.md` | Full step-by-step documentation of the pipeline |
 
 > **"NoDrop" in filenames** means non-codable rows are kept in the output (marked with `activity_type = non_codable`) rather than being dropped. This is the correct behavior for the current pipeline.
@@ -123,7 +123,7 @@ Same story here — the names aren't obvious. Here's what everything actually is
 
 ## Other Folders
 
-These folders are **not needed to run the main pipelines** — they're mostly QC scripts and exploratory work I did along the way.
+These folders are **not needed to run the main pipelines**. They're mostly QC scripts and exploratory work I did along the way.
 
 | Folder | Contents |
 |--------|----------|
